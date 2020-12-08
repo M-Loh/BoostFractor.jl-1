@@ -107,6 +107,24 @@ function SeedSetupBoundaries(coords::CoordinateSystem; diskno=3, distance=nothin
     return SetupBoundaries(distance, Array{Complex{Float64}}(reflectivities), Array{Complex{Float64}}(epsilon), relative_tilt_x, relative_tilt_y, relative_surfaces)
 end
 
+@doc raw"""
+# Summary
+    struct PhaseShifts
+
+
+contains momentum-space and real-space phase shifts along with some other details needed for the propagators
+
+# Fields:
+- `k0::Array{ComplexF64,1}`: 2π√ϵ / λ
+- `k_prop::Array{ComplexF64,3}`: Momentum-space phase shifts
+- `surface::Array{ComplexF64,3}`: real space phase shifts (from tilts and surface misalignments) only on the subarray enclosing the diskarea
+- `surface_out` : same as surface but for individual boundaries and for the entire coordinate space. needed to account for special cases in dancer and cheerleader
+- `diskR` : same as in SetupBoundaries
+- `dz::Array{Float64,2}` : same as SetupBoundaries distance
+- `x_sub` : indices for the subarray of the coordinate space that exactly encloses the disk area
+- `y_sub` : same as x_sub but for the y dimension
+"""
+
 struct PhaseShifts
     #pre-calculate k0 for each boundary.
     k0::Array{ComplexF64, 1}
@@ -167,7 +185,6 @@ end
 ## The heart of it #################################################################################
 
 ## Propagators ########################################################################################
-#TODO: propagator and propagator NoTilts are in-place, julia convention is name! instead of name
 """
     propagator!(E0, i, coords::CoordinateSystem, phase::PhaseShifts, plan, i_plan)
 

@@ -32,11 +32,11 @@ end
     # Initialize Coordinate System
     dx = 0.01
     coords = SeedCoordinateSystem(X = -0.5:dx:0.5, Y = -0.5:dx:0.5)
-    
+
     diskR = 0.15
 
     sbdry = SeedSetupBoundaries(coords, diskno=1)
-    
+
 end
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,9 +66,9 @@ match = unnormalized_match(gauss_shape, 3 .* gauss_shape, dx=dx, dy=dy)
 
     nmax = 100 # Maximum Number of Iterations
     #1D (if you calculate in 1D, use (vcat) above instead of (zcat) )
-    #cheerleader(0,nmax,sbdry; prop=propagator1D,f=10e9,Xset=X,Yset=Y)
-    #3D    
-    cheerleader(0,nmax,sbdry,coords; prop=propagator,f=10e9,diskR=diskR)
+    #cheerleader(0,nmax,sbdry; prop! =propagator1D!,f=10e9,Xset=X,Yset=Y)
+    #3D
+    cheerleader(0,nmax,sbdry,coords; prop! =propagator!,f=10e9,diskR=diskR)
 end;
 
 boost_factor_cheerleader = sum(abs2.(result), dims=(1,2))[1,1,:]*dx*dx/(pi*diskR^2);
@@ -81,17 +81,17 @@ println("Finished testing for CHEERLEADER")
     # Initialize Coordinate System
     dx = 0.01
     coords = SeedCoordinateSystem(X = -0.5:dx:0.5, Y = -0.5:dx:0.5)
-    
+
     diskR = 0.15
-    
+
     # SetupBoundaries
     # No Tilt or surface roughness here.
     epsilon = 9
     eps = Array{Complex{Float64}}([NaN,1,epsilon,1])
     distance = [0.0, 0.15, 0.15/sqrt.(epsilon), 0.0]*1e-2
-    
+
     sbdry = SeedSetupBoundaries(coords, diskno=1, distance=distance, epsilon=eps)
-    
+
 end
 
 # Let us sweep over different disk phase depths for a disk at distance lambda/2 infront of the mirror
@@ -108,9 +108,9 @@ end
 
     nmax = 200 # Maximum Number of Iterations
     #1D (if you calculate in 1D, use (vcat) above instead of (zcat) )
-    dancer(0,nmax,sbdry,coords; prop=propagator1D,f=10e9,diskR=diskR)
-    #3D    
-    #dancer(0,nmax,sbdry,coords; prop=propagator,f=10e9,diskR=diskR)
+    dancer(0,nmax,sbdry,coords; prop! =propagator1D!,f=10e9,diskR=diskR)
+    #3D
+    #dancer(0,nmax,sbdry,coords; prop! =propagator!,f=10e9,diskR=diskR)
 end;
 
 boost_factor_dancer = sum(abs2.(result_dancer), dims=(1,2))[1,1,:]*dx*dx/(pi*diskR^2);
@@ -123,17 +123,17 @@ println("Finished testing for DANCER")
     # Initialize Coordinate System
     dx = 0.01
     coords = SeedCoordinateSystem(X = -0.5:dx:0.5, Y = -0.5:dx:0.5)
-    
+
     diskR = 0.15
-    
+
     # SetupBoundaries
     # No Tilt or surface roughness here.
     epsilon = 9
     eps = Array{Complex{Float64}}([NaN,1,epsilon,1])
     distance = [0.0, 0.15, 0.15/sqrt.(epsilon), 0.0]*1e-2
-    
+
     sbdry = SeedSetupBoundaries(coords, diskno=1, distance=distance, epsilon=eps)
-    
+
     # Initialize modes
     Mmax = 10
     Lmax = 0 # l-Modes are irrelevant for the azimuthally symmetric haloscope
@@ -141,7 +141,7 @@ println("Finished testing for DANCER")
     modes_1D = SeedModes(coords, ThreeDim=false, Mmax=Mmax, Lmax=Lmax, diskR=diskR)
     # For 3D:
     modes = SeedModes(coords, ThreeDim=true, Mmax=Mmax, Lmax=Lmax, diskR=diskR)
-    
+
 end
 
 # Let us sweep over different disk phase depths for a disk at distance lambda/2 infront of the mirror
@@ -156,9 +156,9 @@ end
     sbdry.distance = [0.0, (dnu)*3e-2/(2*pi), Deps[i]*1e-2/(2*pi),0];
 
     #1D (if you calculate in 1D, use (vcat) above instead of (hcat) )
-    #transformer(sbdry; prop=propagator1D,f=10e9,Xset=[1e-7],Yset=[1e-7])
-    #3D    
-    transformer(sbdry,coords,modes; prop=propagator,f=10e9,diskR=diskR)
+    #transformer(sbdry; prop! =propagator1D!,f=10e9,Xset=[1e-7],Yset=[1e-7])
+    #3D
+    transformer(sbdry,coords,modes; prop! =propagator!,f=10e9,diskR=diskR)
 end;
 
 boost_factor_transformer = sum(abs2.(result_transformer), dims=1)[1,:]

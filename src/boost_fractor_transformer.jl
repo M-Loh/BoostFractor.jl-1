@@ -266,12 +266,17 @@ end
 Pre-calculates all the propagation matrices.
 Useful, if they should be altered later (e.g. take out modes, add some additional mixing, etc.)
 """
-function calc_propagation_matrices(bdry::SetupBoundaries, coords::CoordinateSystem, modes::Modes; f=10.0e9, prop=propagator, diskR=0.15)
+function calc_propagation_matrices(bdry::SetupBoundaries, coords::CoordinateSystem, modes::Modes; f=10.0e9, prop! =propagator!, diskR=0.15)
     Nregions = length(bdry.eps)
     lambda = wavelength(f)
-    return [ propagation_matrix(bdry.distance[i], diskR, bdry.eps[i],
-            bdry.relative_tilt_x[i], bdry.relative_tilt_y[i], bdry.relative_surfaces[i,:,:], lambda, coords, modes;
-            prop=prop) for i in 1:(Nregions) ]
+
+    #initialize the arrays with the propagator phases and calcualte fft plans
+	phase = SeedPhaseShifts(bdry, coords, lambda, diskR)
+    plan = plan_fft!(Array{ComplexF64, 2}(undef, length(coords.X), length(coords.Y)), flags=FFTW.ESTIMATE)
+    i_plan = plan_ifft!(Array{ComplexF64, 2}(undef, length(coords.X), length(coords.Y)), flags=FFTW.ESTIMATE)
+
+    return [ propagation_matrix(i, bdry.distance[i], lambda, bdry.eps[i], coords, phase, modes, plan, i_plan;
+            prop! =prop!) for i in 1:(Nregions) ]
 end
 
 """
@@ -292,7 +297,7 @@ function transformer(bdry::SetupBoundaries, coords::CoordinateSystem, modes::Mod
     axion_beam = Array{Complex{T}}(zeros((modes.M)*(2modes.L+1)))
     #println(axion_beam)
 
-    #initialize the arrays with the propagator phases
+    #initialize the arrays with the propagator phases and calcualte fft plans
 	phase = SeedPhaseShifts(bdry, coords, lambda, diskR)
     plan = plan_fft!(Array{ComplexF64, 2}(undef, length(coords.X), length(coords.Y)), flags=FFTW.ESTIMATE)
     i_plan = plan_ifft!(Array{ComplexF64, 2}(undef, length(coords.X), length(coords.Y)), flags=FFTW.ESTIMATE)
